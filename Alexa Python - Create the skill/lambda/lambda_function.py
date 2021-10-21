@@ -64,7 +64,10 @@ class HelpIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         speak_output = "This is the rock, paper, scissors game. Select one of these and see if you gonna beat me."
-
+        
+        # do not end the session
+        handler_input.response_builder.set_should_end_session(False)
+        
         return handler_input.response_builder.speak(speak_output).response
 
 
