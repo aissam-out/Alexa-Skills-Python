@@ -1,9 +1,9 @@
 import logging
 import ask_sdk_core.utils as ask_utils
+from ask_sdk_core.utils import get_supported_interfaces
 
 from ask_sdk_core.skill_builder import SkillBuilder
-from ask_sdk_core.dispatch_components import AbstractRequestHandler
-from ask_sdk_core.dispatch_components import AbstractExceptionHandler
+from ask_sdk_core.dispatch_components import AbstractRequestHandler, AbstractExceptionHandler
 from ask_sdk_core.handler_input import HandlerInput
 
 from ask_sdk_model import Response
@@ -11,22 +11,8 @@ from logic import evaluate_choices
 from random import choices
 
 import json
-from ask_sdk_core.utils import get_supported_interfaces
 from ask_sdk_model.interfaces.alexa.presentation.apl import RenderDocumentDirective
-from apl.apl_content import apl_main_template
-
-from utils import create_presigned_url
-from ask_sdk_model import ui
-
-def create_url(key):
-    img_url_raw = str(ui.Image(large_image_url=create_presigned_url(key)))
-    length = len(img_url_raw)
-    return img_url_raw[21:length-28]
-
-def _load_apl_document(file_path):
-    """Load the apl json document at the path into a dict object."""
-    with open(file_path) as f:
-        return json.load(f)
+from apl.apl_content import apl_main_template, create_url, _load_apl_document, get_apl_content
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -73,15 +59,24 @@ class answerIntentHandler(AbstractRequestHandler):
         # get the user's choice
         users_choice = handler_input.request_envelope.request.intent.slots["rpschoice"].value
         # evaluate the choices based on the logic of the game
-        speak_output = evaluate_choices(alexas_choice, users_choice)
-        # end the session
-        handler_input.response_builder.set_should_end_session(True)
+        winner, speak_output = evaluate_choices(alexas_choice, users_choice)
+        # generate APL
+        aplanswer = get_apl_content(winner)
+        # do not end the session
+        handler_input.response_builder.set_should_end_session(False)
+        speak_output += " Play again.. "
+        # reinitiate the game for the next game
+        session_attributes['alexas_choice'] = choices(['rock', 'paper', 'scissors'])
+        # APL handler
+        if get_supported_interfaces(handler_input).alexa_presentation_apl is not None:
+            handler_input.response_builder.add_directive(
+                RenderDocumentDirective(
+                    document=_load_apl_document("./apl/answer.json"),
+                    datasources = aplanswer
+                )
+            )
 
-        return (
-            handler_input.response_builder
-                .speak(speak_output)
-                .response
-        )
+        return handler_input.response_builder.speak(speak_output).response
 
 class HelpIntentHandler(AbstractRequestHandler):
     """Handler for Help Intent."""
