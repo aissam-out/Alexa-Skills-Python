@@ -10,26 +10,9 @@ from ask_sdk_model import Response
 from logic import evaluate_choices
 from random import choices
 
-import json
-from ask_sdk_core.utils import get_supported_interfaces
-from ask_sdk_model.interfaces.alexa.presentation.apl import RenderDocumentDirective
-from apl.apl_content import apl_main_template
-
-from utils import create_presigned_url
-from ask_sdk_model import ui
-
-def create_url(key):
-    img_url_raw = str(ui.Image(large_image_url=create_presigned_url(key)))
-    length = len(img_url_raw)
-    return img_url_raw[21:length-28]
-
-def _load_apl_document(file_path):
-    """Load the apl json document at the path into a dict object."""
-    with open(file_path) as f:
-        return json.load(f)
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
 
 class LaunchRequestHandler(AbstractRequestHandler):
     """Handler for Skill Launch."""
@@ -43,22 +26,13 @@ class LaunchRequestHandler(AbstractRequestHandler):
         session_attributes = handler_input.attributes_manager.session_attributes
         session_attributes['alexas_choice'] = choices(['rock', 'paper', 'scissors'])
         speak_output = "Welcome to the best game in the universe. Please select rock, paper, or scissors. "
-        
-        # APL config
-        aptText = "Welcome to The Rock Paper Scissors Game"
-        aplImage = create_url("Media/rps.jpeg")
-        aplLogo = create_url("Media/logo.png")
-        aplHome = apl_main_template(aplImage, aptText, aplLogo)
-        
-        if get_supported_interfaces(handler_input).alexa_presentation_apl is not None:
-            handler_input.response_builder.add_directive(
-                RenderDocumentDirective(
-                    document=_load_apl_document("./apl/responsive.json"),
-                    datasources = aplHome
-                )
-            )
 
-        return handler_input.response_builder.speak(speak_output).ask(speak_output).response
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
+                .ask(speak_output)
+                .response
+        )
 
 class answerIntentHandler(AbstractRequestHandler):
     """Handler for the answer Intent."""
@@ -90,9 +64,6 @@ class HelpIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         speak_output = "This is the rock, paper, scissors game. Select one of these and see if you gonna beat me."
-        
-        # do not end the session
-        handler_input.response_builder.set_should_end_session(False)
 
         return handler_input.response_builder.speak(speak_output).response
 
