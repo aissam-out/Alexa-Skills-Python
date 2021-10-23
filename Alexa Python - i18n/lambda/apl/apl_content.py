@@ -2,7 +2,7 @@ import json
 from ask_sdk_model import ui
 from apl.utils import create_presigned_url
 
-def apl_main_template(background_url, text, logo):
+def apl_main_template(background_url, text, logo, data):
     output = {
         "headlineTemplateData": {
             "type": "object",
@@ -23,7 +23,7 @@ def apl_main_template(background_url, text, logo):
                     },
                 },
                 "logoUrl": logo,
-                "hintText": "Try, \"Alexa, What are the rules of this game?\"",
+                "hintText": data['HINTTEXT'],
             }
         }
     }
@@ -40,19 +40,19 @@ def _load_apl_document(file_path):
     with open(file_path) as f:
         return json.load(f)
 
-def get_apl_content(winner):
+def get_apl_content(winner, data):
     aplLogo = create_url("Media/logo.png")
     if winner == "alexa":
-        aptText = "Loser!"
+        aptText = data["APLLOSER"]
         aplImage = create_url("Media/loser.jpeg")
     elif winner == "user":
-        aptText = "Congratulations!"
+        aptText = data["APLWINNER"]
         aplImage = create_url("Media/winner.jpeg")
     else:
-        aptText = "Draw!"
+        aptText = data["APLDRAW"]
         aplImage = create_url("Media/draw.jpeg")
     
-    aplResult = apl_main_template(aplImage, aptText, aplLogo)
+    aplResult = apl_main_template(aplImage, aptText, aplLogo, data)
     
     return aplResult
 
