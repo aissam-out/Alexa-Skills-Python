@@ -3,7 +3,7 @@ import ask_sdk_core.utils as ask_utils
 from ask_sdk_core.utils import get_supported_interfaces
 
 from ask_sdk_core.skill_builder import SkillBuilder
-from ask_sdk_core.dispatch_components import AbstractRequestHandler, AbstractExceptionHandler
+from ask_sdk_core.dispatch_components import AbstractRequestHandler, AbstractExceptionHandler, AbstractRequestInterceptor
 from ask_sdk_core.handler_input import HandlerInput
 
 from ask_sdk_model import Response
@@ -27,14 +27,17 @@ class LaunchRequestHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         session_attributes = handler_input.attributes_manager.session_attributes
-        session_attributes['alexas_choice'] = choices(['rock', 'paper', 'scissors'])
-        speak_output = "Welcome to the best game in the universe. Please select rock, paper, or scissors. "
+        # i18n
+        data = handler_input.attributes_manager.request_attributes["_"]
+        
+        session_attributes['alexas_choice'] = choices([data["ROCK"], data["PAPER"], data["SCISSORS"]])
+        speak_output = data["WELCOME"]
         
         # APL config
-        aptText = "Welcome to The Rock Paper Scissors Game"
+        aplText = data["APLTEXT"]
         aplImage = create_url("Media/rps.jpeg")
         aplLogo = create_url("Media/logo.png")
-        aplHome = apl_main_template(aplImage, aptText, aplLogo)
+        aplHome = apl_main_template(aplImage, aplText, aplLogo, data)
         
         if get_supported_interfaces(handler_input).alexa_presentation_apl is not None:
             handler_input.response_builder.add_directive(
@@ -58,15 +61,22 @@ class answerIntentHandler(AbstractRequestHandler):
         alexas_choice = session_attributes['alexas_choice'][0]
         # get the user's choice
         users_choice = handler_input.request_envelope.request.intent.slots["rpschoice"].value
+        
+        # i18n
+        data = handler_input.attributes_manager.request_attributes["_"]
+
         # evaluate the choices based on the logic of the game
-        winner, speak_output = evaluate_choices(alexas_choice, users_choice)
+        winner, speak_output = evaluate_choices(alexas_choice, users_choice, data)
+        speak_output += data['PLAYAGAIN']
+        
         # generate APL
-        aplanswer = get_apl_content(winner)
+        aplanswer = get_apl_content(winner, data)
         # do not end the session
         handler_input.response_builder.set_should_end_session(False)
-        speak_output += " Play again.. "
+        
+        
         # reinitiate the game for the next game
-        session_attributes['alexas_choice'] = choices(['rock', 'paper', 'scissors'])
+        session_attributes['alexas_choice'] = choices([data["ROCK"], data["PAPER"], data["SCISSORS"]])
         # APL handler
         if get_supported_interfaces(handler_input).alexa_presentation_apl is not None:
             handler_input.response_builder.add_directive(
@@ -84,7 +94,10 @@ class HelpIntentHandler(AbstractRequestHandler):
         return ask_utils.is_intent_name("AMAZON.HelpIntent")(handler_input)
 
     def handle(self, handler_input):
-        speak_output = "This is the rock, paper, scissors game. Select one of these and see if you gonna beat me."
+        
+        # i18n
+        data = handler_input.attributes_manager.request_attributes["_"]
+        speak_output = data['HELP']
         
         # do not end the session
         handler_input.response_builder.set_should_end_session(False)
@@ -101,7 +114,10 @@ class CancelOrStopIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Thanks for your time. Goodbye!"
+        
+        # i18n
+        data = handler_input.attributes_manager.request_attributes["_"]
+        speak_output = data['STOP']
 
         return handler_input.response_builder.speak(speak_output).response
 
@@ -114,8 +130,11 @@ class FallbackIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         logger.info("In FallbackIntentHandler")
-        speech = "Hmm, I'm not sure. You can select rock, paper, or scissors, and see if you gonna beat me."
-        reprompt = "I didn't catch that. You can select rock, paper, or scissors, and see if you gonna beat me."
+        
+        # i18n
+        data = handler_input.attributes_manager.request_attributes["_"]
+        speech = data['FALLBACK']
+        reprompt = data['FALLBACKREP']
 
         return handler_input.response_builder.speak(speech).ask(reprompt).response
 
@@ -145,8 +164,10 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
     def handle(self, handler_input, exception):
         # type: (HandlerInput, Exception) -> Response
         logger.error(exception, exc_info=True)
-
-        speak_output = "Sorry, I had trouble doing what you asked. Please try again."
+        
+        # i18n
+        data = handler_input.attributes_manager.request_attributes["_"]
+        speak_output = data['TROUBLE']
 
         return (
             handler_input.response_builder
@@ -154,6 +175,30 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
                 .ask(speak_output)
                 .response
         )
+
+class LocalizationInterceptor(AbstractRequestInterceptor):
+    """
+    Add function to request attributes, that can load locale specific data.
+    """
+
+    def process(self, handler_input):
+        locale = handler_input.request_envelope.request.locale
+        logger.info("Locale is {}".format(locale))
+
+        # localized strings stored in language_strings.json
+        with open("./language/language_strings.json") as language_prompts:
+            language_data = json.load(language_prompts)
+        # set default translation data to broader translation
+        if locale[:2] in language_data:
+            data = language_data[locale[:2]]
+            # if a more specialized translation exists, then select it instead
+            # example: "fr-CA" will pick "fr" translations first, but if "fr-CA" translation exists,
+            # then pick that instead
+            if locale in language_data:
+                data.update(language_data[locale])
+        else:
+            data = language_data[locale]
+        handler_input.attributes_manager.request_attributes["_"] = data
 
 # The SkillBuilder object acts as the entry point for your skill, routing all request and response
 # payloads to the handlers above. Make sure any new handlers or interceptors you've
@@ -170,5 +215,7 @@ sb.add_request_handler(FallbackIntentHandler())
 sb.add_request_handler(SessionEndedRequestHandler())
 
 sb.add_exception_handler(CatchAllExceptionHandler())
+
+sb.add_global_request_interceptor(LocalizationInterceptor())
 
 lambda_handler = sb.lambda_handler()
