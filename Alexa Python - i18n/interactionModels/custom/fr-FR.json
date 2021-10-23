@@ -1,0 +1,111 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "pierre papier ciseaux",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": [
+            "sur quoi porte ce jeu",
+            "les règles de ce jeu",
+            "les règles du jeu",
+            "quelles sont les règles",
+            "règles"
+          ]
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "answerIntent",
+          "slots": [
+            {
+              "name": "rpschoice",
+              "type": "rpschoice",
+              "samples": [
+                "ciseaux",
+                "papier",
+                "pierre"
+              ]
+            }
+          ],
+          "samples": [
+            "je prends {rpschoice}",
+            "je choisis {rpschoice}",
+            "{rpschoice}",
+            "sélectionner {rpschoice}",
+            "disons {rpschoice}"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "values": [
+            {
+              "name": {
+                "value": "ciseaux"
+              }
+            },
+            {
+              "name": {
+                "value": "papier"
+              }
+            },
+            {
+              "name": {
+                "value": "pierre"
+              }
+            }
+          ],
+          "name": "rpschoice"
+        }
+      ]
+    },
+    "dialog": {
+      "intents": [
+        {
+          "name": "answerIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "rpschoice",
+              "type": "rpschoice",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1626903715718.139407992372"
+              }
+            }
+          ]
+        }
+      ],
+      "delegationStrategy": "ALWAYS"
+    },
+    "prompts": [
+      {
+        "id": "Elicit.Slot.1626903715718.139407992372",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Veuillez choisir pierre, papier, ou ciseaux"
+          }
+        ]
+      }
+    ]
+  },
+  "version": "1"
+}
