@@ -1,111 +1,152 @@
 {
   "interactionModel": {
-    "languageModel": {
-      "invocationName": "rock paper scissors",
-      "intents": [
-        {
-          "name": "AMAZON.CancelIntent",
-          "samples": []
-        },
-        {
-          "name": "AMAZON.HelpIntent",
-          "samples": [
-            "what this game is about",
-            "rules of this game",
-            "rules of the game",
-            "what are the rules",
-            "rules"
-          ]
-        },
-        {
-          "name": "AMAZON.StopIntent",
-          "samples": []
-        },
-        {
-          "name": "AMAZON.NavigateHomeIntent",
-          "samples": []
-        },
-        {
-          "name": "AMAZON.FallbackIntent",
-          "samples": []
-        },
-        {
-          "name": "answerIntent",
-          "slots": [
-            {
-              "name": "rpschoice",
-              "type": "rpschoice",
-              "samples": [
-                "scissors",
-                "paper",
-                "rock"
-              ]
-            }
+      "languageModel": {
+          "invocationName": "rock paper scissors",
+          "intents": [
+              {
+                  "name": "AMAZON.CancelIntent",
+                  "samples": []
+              },
+              {
+                  "name": "AMAZON.HelpIntent",
+                  "samples": [
+                      "what this game is about",
+                      "rules of this game",
+                      "rules of the game",
+                      "what are the rules",
+                      "rules"
+                  ]
+              },
+              {
+                  "name": "AMAZON.StopIntent",
+                  "samples": []
+              },
+              {
+                  "name": "AMAZON.NavigateHomeIntent",
+                  "samples": []
+              },
+              {
+                  "name": "AMAZON.FallbackIntent",
+                  "samples": []
+              },
+              {
+                  "name": "answerIntent",
+                  "slots": [
+                      {
+                          "name": "rpschoice",
+                          "type": "rpschoice",
+                          "samples": [
+                              "scissors",
+                              "paper",
+                              "rock"
+                          ]
+                      }
+                  ],
+                  "samples": [
+                      "I'm going for {rpschoice}",
+                      "pick {rpschoice}",
+                      "{rpschoice}",
+                      "select {rpschoice}",
+                      "I choose {rpschoice}"
+                  ]
+              },
+              {
+                  "name": "BuyIntent",
+                  "slots": [
+                      {
+                          "name": "productCategory",
+                          "type": "ProductName"
+                      }
+                  ],
+                  "samples": [
+                      "How to buy the premium product",
+                      "purchase",
+                      "buy {productCategory}",
+                      "purchase premium product",
+                      "buy premium product"
+                  ]
+              },
+              {
+                  "name": "CancelIntent",
+                  "slots": [
+                      {
+                          "name": "productCategory",
+                          "type": "ProductName"
+                      }
+                  ],
+                  "samples": [
+                      "I want to cancel my subscription",
+                      "cancel subscription",
+                      "cancel {productCategory}",
+                      "cancel premium product",
+                      "cancel product"
+                  ]
+              }
           ],
-          "samples": [
-            "I\u0027m going for {rpschoice}",
-            "pick {rpschoice}",
-            "{rpschoice}",
-            "select {rpschoice}",
-            "I choose {rpschoice}"
+          "types": [
+              {
+                  "name": "rpschoice",
+                  "values": [
+                      {
+                          "name": {
+                              "value": "scissors"
+                          }
+                      },
+                      {
+                          "name": {
+                              "value": "paper"
+                          }
+                      },
+                      {
+                          "name": {
+                              "value": "rock"
+                          }
+                      }
+                  ]
+              },
+              {
+                  "name": "ProductName",
+                  "values": [
+                      {
+                          "name": {
+                              "value": "premium product"
+                          }
+                      }
+                  ]
+              }
           ]
-        }
-      ],
-      "types": [
-        {
-          "values": [
-            {
-              "name": {
-                "value": "scissors"
+      },
+      "dialog": {
+          "intents": [
+              {
+                  "name": "answerIntent",
+                  "confirmationRequired": false,
+                  "prompts": {},
+                  "slots": [
+                      {
+                          "name": "rpschoice",
+                          "type": "rpschoice",
+                          "confirmationRequired": false,
+                          "elicitationRequired": true,
+                          "prompts": {
+                              "elicitation": "Elicit.Slot.1626903715718.139407992372"
+                          }
+                      }
+                  ]
               }
-            },
-            {
-              "name": {
-                "value": "paper"
-              }
-            },
-            {
-              "name": {
-                "value": "rock"
-              }
-            }
           ],
-          "name": "rpschoice"
-        }
-      ]
-    },
-    "dialog": {
-      "intents": [
-        {
-          "name": "answerIntent",
-          "confirmationRequired": false,
-          "prompts": {},
-          "slots": [
-            {
-              "name": "rpschoice",
-              "type": "rpschoice",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.1626903715718.139407992372"
-              }
-            }
-          ]
-        }
-      ],
-      "delegationStrategy": "ALWAYS"
-    },
-    "prompts": [
-      {
-        "id": "Elicit.Slot.1626903715718.139407992372",
-        "variations": [
+          "delegationStrategy": "ALWAYS"
+      },
+      "prompts": [
           {
-            "type": "PlainText",
-            "value": "Please select rock, paper, or scissors"
+              "id": "Elicit.Slot.1626903715718.139407992372",
+              "variations": [
+                  {
+                      "type": "PlainText",
+                      "value": "Please select rock, paper, or scissors"
+                  }
+              ]
           }
-        ]
-      }
-    ]
-  },
-  "version": "3"
+      ]
+  }
 }
