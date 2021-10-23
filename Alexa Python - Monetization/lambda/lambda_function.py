@@ -1,8 +1,7 @@
 import logging
 import ask_sdk_core.utils as ask_utils
-from ask_sdk_core.utils import get_supported_interfaces
+from ask_sdk_core.utils import get_supported_interfaces, is_request_type, is_intent_name
 
-from ask_sdk_core.skill_builder import SkillBuilder
 from ask_sdk_core.dispatch_components import AbstractRequestHandler, AbstractExceptionHandler, AbstractRequestInterceptor
 from ask_sdk_core.handler_input import HandlerInput
 
@@ -14,6 +13,12 @@ import json
 from ask_sdk_model.interfaces.alexa.presentation.apl import RenderDocumentDirective
 from apl.apl_content import apl_main_template, create_url, _load_apl_document, get_apl_content
 
+from ask_sdk.standard import StandardSkillBuilder
+from ask_sdk_model.interfaces.monetization.v1 import PurchaseResult
+from ask_sdk_model.interfaces.connections import SendRequestDirective
+from monetize import get_all_entitled_products, get_resolved_value, in_skill_product_response
+
+sb = StandardSkillBuilder()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -67,13 +72,19 @@ class answerIntentHandler(AbstractRequestHandler):
 
         # evaluate the choices based on the logic of the game
         winner, speak_output = evaluate_choices(alexas_choice, users_choice, data)
+        
+        # add a silly premium message
+        in_skill_response = in_skill_product_response(handler_input)
+        entitled_prods = get_all_entitled_products(in_skill_response.in_skill_products)
+        if entitled_prods:
+            speak_output += data['PREMIUM']
+        
         speak_output += data['PLAYAGAIN']
         
         # generate APL
         aplanswer = get_apl_content(winner, data)
         # do not end the session
         handler_input.response_builder.set_should_end_session(False)
-        
         
         # reinitiate the game for the next game
         session_attributes['alexas_choice'] = choices([data["ROCK"], data["PAPER"], data["SCISSORS"]])
@@ -104,6 +115,140 @@ class HelpIntentHandler(AbstractRequestHandler):
 
         return handler_input.response_builder.speak(speak_output).response
 
+# MONETIZATION: BUY & CANCEL & BUYRESPONSE & CANCELRESPONSE
+class BuyHandler(AbstractRequestHandler):
+    """Handler for letting users buy the product"""
+    def can_handle(self, handler_input):
+        return is_intent_name("BuyIntent")(handler_input)
+
+    def handle(self, handler_input):
+        logger.info("In BuyHandler")
+
+        in_skill_response = in_skill_product_response(handler_input)
+        if in_skill_response:
+            product_category = get_resolved_value(handler_input.request_envelope.request, "productCategory")
+
+            # No entity resolution match
+            if product_category is None:
+                product_category = "premium-product"
+
+            product = [l for l in in_skill_response.in_skill_products if l.reference_name == product_category]
+            
+            return handler_input.response_builder.add_directive(
+                SendRequestDirective(
+                    name="Buy",
+                    payload={"InSkillProduct": {"productId": product[0].product_id}},
+                    token="correlationToken")
+            ).response
+
+class CancelProductIntentHandler(AbstractRequestHandler):
+    """Following handler demonstrates how Skills would receive Cancel sub requests"""
+    def can_handle(self, handler_input):
+        return is_intent_name("CancelIntent")(handler_input)
+
+    def handle(self, handler_input):
+        logger.info("In CancelIntentHandler")
+        
+        locale = handler_input.request_envelope.request.locale
+        ms = handler_input.service_client_factory.get_monetization_service()
+        product_response = ms.get_in_skill_products(locale)
+        slots = handler_input.request_envelope.request.intent.slots
+        product_ref_name = slots.get("premium-product")
+        
+        # No entity resolution match
+        if product_ref_name is None:
+            product_ref_name = "premium-product"
+
+        product_record = [l for l in product_response.in_skill_products if l.reference_name == product_ref_name]
+        data = handler_input.attributes_manager.request_attributes["_"]
+
+        if product_record:
+            return handler_input.response_builder.add_directive(
+                SendRequestDirective(
+                    name="Cancel",
+                    payload={"InSkillProduct": {"productId": product_record[0].product_id}},
+                    token="correlationToken")
+            ).response
+        else:
+            return handler_input.response_builder.speak(data["NOCANCEL"]).response
+
+class BuyResponseHandler(AbstractRequestHandler):
+    """This handles the Connections.Response event after a buy occurs."""
+    def can_handle(self, handler_input):
+        return (is_request_type("Connections.Response")(handler_input) and
+                handler_input.request_envelope.request.name == "Buy")
+
+    def handle(self, handler_input):
+        logger.info("In BuyResponseHandler")
+        in_skill_response = in_skill_product_response(handler_input)
+        product_id = handler_input.request_envelope.request.payload.get("productId")
+        session_attributes = handler_input.attributes_manager.session_attributes
+        data = handler_input.attributes_manager.request_attributes["_"]
+        
+        if in_skill_response:
+            product = [l for l in in_skill_response.in_skill_products if l.product_id == product_id]
+
+            if handler_input.request_envelope.request.status.code == "200":
+                speech = None
+                purchase_result = handler_input.request_envelope.request.payload.get("purchaseResult")
+                if purchase_result == PurchaseResult.ACCEPTED.value:
+                    speech = data["BUYACCEPT"]
+                elif purchase_result in (PurchaseResult.DECLINED.value, PurchaseResult.ERROR.value, PurchaseResult.NOT_ENTITLED.value):
+                    speech = data["BUYDECLINE"]
+                elif purchase_result == PurchaseResult.ALREADY_PURCHASED.value:
+                    speech = data["BUYALREADY"]
+                else:
+                    # Invalid purchase result value
+                    logger.info("Purchase result: {}".format(purchase_result))
+                    return FallbackIntentHandler().handle(handler_input)
+                
+                speech += data["ASK"]
+                session_attributes['alexas_choice'] = choices([data["ROCK"], data["PAPER"], data["SCISSORS"]])
+                handler_input.response_builder.set_should_end_session(False)
+                return handler_input.response_builder.speak(speech).response
+            else:
+                logger.log("Connections.Response indicated failure. "
+                           "Error: {}".format(handler_input.request_envelope.request.status.message))
+                return handler_input.response_builder.speak(data["ERRBUY"]).response
+
+class CancelResponseHandler(AbstractRequestHandler):
+    """This handles the Connections.Response event after a cancel occurs."""
+    def can_handle(self, handler_input):
+        return (is_request_type("Connections.Response")(handler_input) and
+                handler_input.request_envelope.request.name == "Cancel")
+
+    def handle(self, handler_input):
+        logger.info("In CancelResponseHandler")
+        in_skill_response = in_skill_product_response(handler_input)
+        product_id = handler_input.request_envelope.request.payload.get("productId")
+        session_attributes = handler_input.attributes_manager.session_attributes
+        entitled_prods = get_all_entitled_products(in_skill_response.in_skill_products)
+        data = handler_input.attributes_manager.request_attributes["_"]
+
+        if in_skill_response:
+            product = [l for l in in_skill_response.in_skill_products if l.product_id == product_id]
+
+            if handler_input.request_envelope.request.status.code == "200":
+                speech = None
+                purchase_result = handler_input.request_envelope.request.payload.get("purchaseResult")
+                purchasable = product[0].purchasable
+
+                if purchase_result == PurchaseResult.ACCEPTED.value:
+                    speech = data["ASK"]
+                elif purchase_result in (PurchaseResult.DECLINED.value, PurchaseResult.ERROR.value, PurchaseResult.NOT_ENTITLED.value):
+                    speech = data["ASK"]
+                else:
+                    # Invalid result value
+                    logger.info("Cancel Purchase result: {}".format(purchase_result))
+                    return FallbackIntentHandler().handle(handler_input)
+                
+                session_attributes['alexas_choice'] = choices([data["ROCK"], data["PAPER"], data["SCISSORS"]])
+                handler_input.response_builder.set_should_end_session(False)
+                return handler_input.response_builder.speak(speech).response
+            else:
+                logger.log("Connections.Response indicated failure. "
+                           "Error: {}".format(handler_input.request_envelope.request.status.message))
+                return handler_input.response_builder.speak(data["ERRBUY"]).response
 
 class CancelOrStopIntentHandler(AbstractRequestHandler):
     """Single handler for Cancel and Stop Intent."""
@@ -204,11 +349,14 @@ class LocalizationInterceptor(AbstractRequestInterceptor):
 # payloads to the handlers above. Make sure any new handlers or interceptors you've
 # defined are included below. The order matters - they're processed top to bottom.
 
-
-sb = SkillBuilder()
-
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(answerIntentHandler())
+
+sb.add_request_handler(BuyHandler())
+sb.add_request_handler(CancelProductIntentHandler())
+sb.add_request_handler(CancelResponseHandler())
+sb.add_request_handler(BuyResponseHandler())
+
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
 sb.add_request_handler(FallbackIntentHandler())
