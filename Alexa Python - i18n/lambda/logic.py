@@ -1,26 +1,26 @@
-def evaluate_choices(alexas_choice, users_choice):
+def evaluate_choices(alexas_choice, users_choice, data):
     """Given their answers, this function evaluates which one is the winner, alexa or the user."""
     
-    if alexas_choice == "paper" and users_choice == "scissors":
-        message = f"Congratulations! You won! You chose {users_choice}, while my choice was {alexas_choice}."
+    if alexas_choice == data["PAPER"] and users_choice == data["SCISSORS"]:
+        message = data["WINNER"].format(users_choice, alexas_choice)
         winner = "user"
-    elif alexas_choice == "paper" and users_choice == "rock":
-        message = f"Loser! I won! You chose {users_choice}, while my choice was {alexas_choice}."
+    elif alexas_choice == data["PAPER"] and users_choice == data["ROCK"]:
+        message = data["LOSER"].format(users_choice, alexas_choice)
         winner = "alexa"
-    elif alexas_choice == "scissors" and users_choice == "paper":
-        message = f"Loser! I won! You chose {users_choice}, while my choice was {alexas_choice}."
+    elif alexas_choice == data["SCISSORS"] and users_choice == data["PAPER"]:
+        message = data["LOSER"].format(users_choice, alexas_choice)
         winner = "alexa"
-    elif alexas_choice == "scissors" and users_choice == "rock":
-        message = f"Congratulations! You won! You chose {users_choice}, while my choice was {alexas_choice}."
+    elif alexas_choice == data["SCISSORS"] and users_choice == data["ROCK"]:
+        message = data["WINNER"].format(users_choice, alexas_choice)
         winner = "user"
-    elif alexas_choice == "rock" and users_choice == "paper":
-        message = f"Congratulations! You won! You chose {users_choice}, while my choice was {alexas_choice}."
+    elif alexas_choice == data["ROCK"] and users_choice == data["PAPER"]:
+        message = data["WINNER"].format(users_choice, alexas_choice)
         winner = "user"
-    elif alexas_choice == "rock" and users_choice == "scissors":
-        message = f"Loser! I won! You chose {users_choice}, while my choice was {alexas_choice}."
+    elif alexas_choice == data["ROCK"] and users_choice == data["SCISSORS"]:
+        message = data["LOSER"].format(users_choice, alexas_choice)
         winner = "alexa"
     else:
-        message = f"It's a draw! we both chose {users_choice}. It was nice to play with you."
+        message = data["DRAW"].format(users_choice)
         winner = "draw"
     
     return winner, message
