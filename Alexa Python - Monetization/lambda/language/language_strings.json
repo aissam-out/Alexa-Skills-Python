@@ -16,8 +16,16 @@
         "HELP" : "This is the rock, paper, scissors game. Select one of these and see if you gonna beat me.",
         "STOP" : "Thanks for your time. Goodbye!",
         "FALLBACK" : "Hmm, I'm not sure. You can select rock, paper, or scissors, and see if you gonna beat me.",
-        "FALLBACKREP" : "I didn't catch that. You can select rock, paper, or scissors, and see if you gonna beat me.",
-        "TROUBLE" : "Sorry, I had trouble doing what you asked. Please try again."
+        "FALLBACKREP" : "I didn't catch that. You can select rock, paper, or scissors, and see if you're gonna beat me.",
+        "TROUBLE" : "Sorry, I had trouble doing what you asked. Please try again.",
+        "BUYACCEPT" : " You got the premium product. ",
+        "BUYDECLINE" : " Don't worry. You still can play without paying anything. ",
+        "BUYALREADY" : " You already have the premium product. ",
+        "ASK" : " Select rock paper scissors, and see if you can beat me. ",
+        "ERRBUY": " There was an error. ",
+        "NOCANCEL" : " I am sorry. I don't know that one. ",
+        "PREMIUM" : " Premium message. "
+
     },
     "fr": {
         "WELCOME" : "Bienvenue au meilleur jeu de l'univers. Veuillez choisir pierre, papier ou ciseaux. ",
@@ -37,6 +45,13 @@
         "STOP" : "Merci pour votre temps. Au revoir !",
         "FALLBACK" : "Hmm, je ne suis pas sûr. Tu peux choisir pierre, papier, ou ciseaux, et voir si tu vas me battre.",
         "FALLBACKREP" : "Je n'ai pas compris. Tu peux choisir pierre, papier ou ciseaux, et voir si tu vas me battre.",
-        "TROUBLE" : "Désolé, j'ai eu du mal à faire ce que vous avez demandé. Veuillez réessayer."
+        "TROUBLE" : "Désolé, j'ai eu du mal à faire ce que vous avez demandé. Veuillez réessayer.",
+        "BUYACCEPT" : " Vous avez obtenu le produit premium. ",
+        "BUYDECLINE" : " Ne vous inquiétez pas. Vous pouvez toujours jouer sans rien payer. ",
+        "BUYALREADY" : " Vous avez déjà le produit premium. ",
+        "ASK" : " Choisissez pierre papier ou ciseaux, et voyez si vous pouvez me battre. ",
+        "ERRBUY": " Il y a eu une erreur. ",
+        "NOCANCEL" : " Je suis désolé. Je ne connais pas ça. ",
+        "PREMIUM" : " Message premium. "
     }
 }
