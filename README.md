@@ -13,6 +13,7 @@ Creation of a basic skill that will accompany us throughout our learning journey
  
 ## [Alexa Python - Alexa Presentation Language](https://github.com/aissam-out/Alexa-Skills-Python/tree/main/Alexa%20Python%20-%20Alexa%20Presentation%20Language): 
 This part is about adding Alexa Presentation Language (APL) to our skill. In other words, we will provide a visual experience to Alexa devices that have screens. 
+![APL](./images/apl.png)
 
 ## [Alexa Python - Internationalization (i18n)](https://github.com/aissam-out/Alexa-Skills-Python/tree/main/Alexa%20Python%20-%20i18n): 
 Here we will discover how to implement a multi-language skill, that is to have your skill speak different languages depending on where your users are.
