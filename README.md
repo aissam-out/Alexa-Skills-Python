@@ -1,5 +1,7 @@
 # Alexa-Skills-Python
 
+<img source="./images/alexa.png">
+
 This project aims to provide you with the main functionalities that you should know if you want to start your journey as an Alexa skills developer. The code in this repo is used to complete a tutorial in Towards Data Science, therefore if you want to have more details about the code check my [Medium profile](https://aissam-outchakoucht.medium.com/).
 
 The vast majority of tutorials and code I found on popular platforms (GitHub, Stack Overflow, Medium, ...) used Node.js, and being a Python guy, I had a hard time finding the right answers to my questions when I encountered a problem. I hope you'll find this series useful if you're trying to develop Alexa skills using Python.
