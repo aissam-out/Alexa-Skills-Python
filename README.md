@@ -8,6 +8,8 @@ The vast majority of tutorials and code I found on popular platforms (GitHub, St
 
 ## [Alexa Python - Create the skill](https://github.com/aissam-out/Alexa-Skills-Python/tree/main/Alexa%20Python%20-%20Create%20the%20skill): 
 Creation of a basic skill that will accompany us throughout our learning journey. I chose a case study that will allow us to add (and therefore learn about) the main functionalities every Alexa skills developer should be aware of.
+
+![Skill creation](./images/intro.png)
  
 ## [Alexa Python - Alexa Presentation Language](https://github.com/aissam-out/Alexa-Skills-Python/tree/main/Alexa%20Python%20-%20Alexa%20Presentation%20Language): 
 This part is about adding Alexa Presentation Language (APL) to our skill. In other words, we will provide a visual experience to Alexa devices that have screens. 
