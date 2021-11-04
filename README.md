@@ -6,6 +6,8 @@ This project aims to provide you with the main functionalities that you should k
 
 The vast majority of tutorials and code I found on popular platforms (GitHub, Stack Overflow, Medium, ...) used Node.js, and being a Python guy, I had a hard time finding the right answers to my questions when I encountered a problem. I hope you'll find this series useful if you're trying to develop Alexa skills using Python.
 
+As a case study for this tutorial, I'm developping the popular game Rock Paper Scissors. I chose this game for two reasons: first, because (almost) everyone knows what it is. Second, because of its simplicity. And by simplicity I mean that we won’t worry so much about the logic of the game as we will about learning the Alexa tools.
+
 ## [Alexa Python - Create the skill](https://github.com/aissam-out/Alexa-Skills-Python/tree/main/Alexa%20Python%20-%20Create%20the%20skill): 
 Creation of a basic skill that will accompany us throughout our learning journey. I chose a case study that will allow us to add (and therefore learn about) the main functionalities every Alexa skills developer should be aware of.
 
