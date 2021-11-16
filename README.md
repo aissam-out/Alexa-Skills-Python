@@ -1,9 +1,7 @@
 # Alexa-Skills-Python
 
-![Alexa Photo by Brandon Romanchuk on Unsplash](./images/alexa.jpeg)
-
 <p align="center">
-  <img src="./images/alexa.jpeg" width="600" height="400" />
+  <img src="./images/alexa.jpeg" width="600" height="400" alt="Alexa Photo by Brandon Romanchuk on Unsplash" />
 </p>
 
 This project aims to provide you with the main functionalities that you should know if you want to start your journey as an Alexa skills developer. The code in this repo is used to complete a tutorial in Towards Data Science, therefore if you want to have more details about the code check my [Medium profile](https://aissam-outchakoucht.medium.com/).
