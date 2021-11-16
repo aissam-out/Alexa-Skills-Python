@@ -13,7 +13,7 @@ As a case study for this tutorial, I'm developping the popular game Rock Paper S
 ## [Alexa Python - Create the skill](https://github.com/aissam-out/Alexa-Skills-Python/tree/main/Alexa%20Python%20-%20Create%20the%20skill): 
 Creation of a basic skill that will accompany us throughout our learning journey. I chose a case study that will allow us to add (and therefore learn about) the main functionalities every Alexa skills developer should be aware of.
 
-[Medium post](https://aissam-outchakoucht.medium.com/alexa-skills-with-python-101-tutorial-bf6b7ac71897)
+[This Medium post](https://aissam-outchakoucht.medium.com/alexa-skills-with-python-101-tutorial-bf6b7ac71897) explains the steps leading the code in this repo. Basically, in this post I shared with you how to create a Rock Paper Scissors skill. We covered the concepts of intents, slots, tests, and many others.
 
 ![Skill creation](./images/intro.png)
  
